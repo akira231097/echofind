@@ -25,6 +25,8 @@ resolve pronouns, follow-ups, and topic shifts across turns.
 > ⚙️ Built with FastAPI + Server-Sent Events, Google Gemini, OpenAI embeddings,
 > Pinecone hybrid search, Cohere reranking, and PostgreSQL. ~17k lines of Python.
 
+> 📐 **[Architecture diagram & design deep-dive →](docs/DESIGN.md)**
+
 ---
 
 ## Table of contents

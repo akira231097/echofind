@@ -1,0 +1,43 @@
+.git
+.github
+.gitignore
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.*
+credentials.*
+
+# Generated / large artifacts
+bm25_model.json
+*_results.json
+debug_memory/
+*.log
+
+# Local docs/tests not needed in the runtime image
+tests/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
