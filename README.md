@@ -2,6 +2,13 @@
 
 **A memory-aware, conversational RAG engine that finds the single best podcast clip or episode for a natural-language question.**
 
+![Python](https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Gemini](https://img.shields.io/badge/LLM-Gemini-4285F4?logo=google&logoColor=white)
+![Pinecone](https://img.shields.io/badge/vector-Pinecone-111111)
+![Cohere](https://img.shields.io/badge/rerank-Cohere-39594C)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+
 EchoFind is the conversational front door to a large podcast catalog. Ask it
 something the way you'd ask a friend — *"what did that founder say about pricing
 last month?"*, *"find the latest episode with the neuroscientist"*, *"who was
