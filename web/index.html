@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoFind</title>
+    <style>
+        /* ============================================================
+           CSS VARIABLES & RESET
+           ============================================================ */
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --accent: #8b5cf6;
+            --accent-hover: #7c3aed;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #475569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ============================================================
+           HEADER
+           ============================================================ */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-secondary);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .logo-text h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        /* ============================================================
+           MAIN LAYOUT
+           ============================================================ */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        /* ============================================================
+           MESSAGES CONTAINER
+           ============================================================ */
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            padding-bottom: 1rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            max-width: 100%;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .message.user .avatar {
+            background: #3b82f6;
+        }
+
+        .message.assistant .avatar {
+            background: var(--accent);
+        }
+
+        .message-content {
+            flex: 1;
+            max-width: 80%;
+        }
+
+        .message.user .message-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .message-bubble {
+            padding: 1rem;
+            border-radius: 1rem;
+            line-height: 1.5;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+
+        .message.assistant .message-bubble {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+        }
+
+        .followup-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ============================================================
+           BRANCH BADGES (NEW FOR AGENT)
+           ============================================================ */
+        .branch-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .branch-badge.small-talk {
+            background: rgba(6, 182, 212, 0.2);
+            color: #06b6d4;
+        }
+
+        .branch-badge.episode-search {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .branch-badge.clip-search {
+            background: rgba(139, 92, 246, 0.2);
+            color: #8b5cf6;
+        }
+
+        /* ============================================================
+           EPISODE CARD (NEW FOR AGENT)
+           ============================================================ */
+        .episode-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .episode-card-header {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .episode-thumbnail {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: var(--bg-tertiary);
+            flex-shrink: 0;
+        }
+
+        .episode-thumbnail-placeholder {
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            flex-shrink: 0;
+        }
+
+        .episode-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .episode-details h4 {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .episode-details h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .episode-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .episode-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .episode-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .episode-actions {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .episode-action-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            text-decoration: none;
+        }
+
+        .episode-action-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* ============================================================
+           SOURCES LIST (NEW FOR EXPLANATIONS)
+           ============================================================ */
+        .sources-list {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .sources-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .source-link {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-decoration: none;
+            margin-bottom: 0.25rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .source-link:hover {
+            text-decoration: underline;
+        }
+
+        /* ============================================================
+           VIDEO CARD
+           ============================================================ */
+        .video-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .video-card video,
+        .video-card audio {
+            width: 100%;
+            max-height: 300px;
+            background: #000;
+        }
+
+        .video-info {
+            padding: 1rem;
+        }
+
+        .video-info h4 {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .video-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ============================================================
+           LOADING ORCHESTRA
+           ============================================================ */
+        #loading-container {
+            display: none;
+            padding: 2rem;
+        }
+
+        #loading-container.active {
+            display: block;
+        }
+
+        .loading-card {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1.5rem;
+            position: relative;
+        }
+
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 8;
+        }
+
+        .progress-ring .bg {
+            stroke: var(--bg-tertiary);
+        }
+
+        .progress-ring .progress {
+            stroke: var(--accent);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.3s ease;
+        }
+
+        .progress-ring .icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+        }
+
+        .loading-label {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-message {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .stage-pills {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .stage-pill {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        .stage-pill.active {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--accent);
+            animation: pulse 1.5s infinite;
+        }
+
+        .stage-pill.complete {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.25rem;
+            margin-top: 1rem;
+        }
+
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: bounce 1s infinite;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 100% { opacity: 0.3; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-5px); }
+        }
+
+        /* ============================================================
+           INPUT AREA
+           ============================================================ */
+        .input-container {
+            padding: 1rem 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        #question-input {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #question-input:focus {
+            border-color: var(--accent);
+        }
+
+        #question-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        #send-btn {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #send-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        #send-btn:disabled {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        /* ============================================================
+           WELCOME SCREEN
+           ============================================================ */
+        .welcome {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(139, 92, 246, 0.2);
+            border-radius: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+        }
+
+        .welcome h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome p {
+            color: var(--text-secondary);
+            max-width: 400px;
+            margin: 0 auto 2rem;
+        }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .suggestion {
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestion:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        /* ============================================================
+           TIMING INFO
+           ============================================================ */
+        .timing-info {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ============================================================
+           RECOMMENDATIONS
+           ============================================================ */
+        .recommendations-container {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .recommendations-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .recommendations-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .recommendation-pill {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .recommendation-pill:hover {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            color: white;
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .recommendation-pill:active {
+            transform: translateY(0);
+        }
+
+        .recommendation-pill.loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .recommendation-pill .icon {
+            font-size: 0.75rem;
+        }
+
+        .recommendations-loading {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .recommendations-loading .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <div class="logo-icon">🎙️</div>
+            <div class="logo-text">
+                <h1>EchoFind</h1>
+                <p>AI-powered podcast discovery</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="resetChat()">New Chat</button>
+            <button class="btn btn-secondary" onclick="showMemory()">Memory</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Messages -->
+        <div id="messages">
+            <div class="welcome" id="welcome">
+                <div class="welcome-icon">🎙️</div>
+                <h2>What would you like to explore?</h2>
+                <p>Ask me anything about podcasts. I'll find the perfect clip with expert insights.</p>
+                <div class="suggestions">
+                    <button class="suggestion" onclick="askQuestion(this.textContent)">Latest Joe Rogan episode</button>
+                    <button class="suggestion" onclick="askQuestion(this.textContent)">Lex Fridman with Sam Altman</button>
+                    <button class="suggestion" onclick="askQuestion(this.textContent)">What does Elon Musk think about AI?</button>
+                    <button class="suggestion" onclick="askQuestion(this.textContent)">Best startup advice from Naval</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Container -->
+        <div id="loading-container">
+            <div class="loading-card">
+                <div class="progress-ring">
+                    <svg width="120" height="120">
+                        <circle class="bg" cx="60" cy="60" r="52"/>
+                        <circle class="progress" cx="60" cy="60" r="52"
+                                stroke-dasharray="326.73" stroke-dashoffset="326.73"/>
+                    </svg>
+                    <span class="icon" id="loading-icon">🧠</span>
+                </div>
+                <div class="loading-label" id="loading-label">Understanding</div>
+                <div class="loading-message" id="loading-message">Analyzing your question...</div>
+
+                <div class="stage-pills">
+                    <span class="stage-pill" data-stage="routing">Routing</span>
+                    <span class="stage-pill" data-stage="analyzing">Analyzing</span>
+                    <span class="stage-pill" data-stage="embedding">Encoding</span>
+                    <span class="stage-pill" data-stage="searching">Searching</span>
+                    <span class="stage-pill" data-stage="reranking">Ranking</span>
+                    <span class="stage-pill" data-stage="selecting">Selecting</span>
+                </div>
+
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="input-container">
+            <div class="input-wrapper">
+                <input type="text" id="question-input"
+                       placeholder="Ask about any podcast topic..."
+                       onkeypress="handleKeyPress(event)">
+                <button id="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ============================================================
+        // STATE
+        // ============================================================
+        const state = {
+            sessionId: 'session-' + Date.now(),
+            isLoading: false,
+            messages: [],
+            currentTurnId: null,  // For recommendations
+            lastMessageElement: null,  // To append recommendations to
+        };
+
+        // Stage configuration
+        const STAGES = {
+            // Router stages (NEW)
+            routing: { icon: '🔀', label: 'Routing', color: '#8b5cf6' },
+            routed: { icon: '✓', label: 'Routed', color: '#10b981' },
+
+            // Existing stages
+            analyzing: { icon: '🧠', label: 'Understanding', color: '#8b5cf6' },
+            analyzed: { icon: '✓', label: 'Understood', color: '#10b981' },
+            embedding: { icon: '🔢', label: 'Encoding', color: '#3b82f6' },
+            embedded: { icon: '✓', label: 'Encoded', color: '#10b981' },
+            searching: { icon: '🔍', label: 'Searching', color: '#f59e0b' },
+            searched: { icon: '✓', label: 'Found', color: '#10b981' },
+            fetching: { icon: '📥', label: 'Loading', color: '#6366f1' },
+            fetched: { icon: '✓', label: 'Loaded', color: '#10b981' },
+            reranking: { icon: '🎯', label: 'Ranking', color: '#ec4899' },
+            reranked: { icon: '✓', label: 'Ranked', color: '#10b981' },
+            selecting: { icon: '✨', label: 'Selecting', color: '#f97316' },
+            complete: { icon: '🎬', label: 'Ready', color: '#10b981' },
+            error: { icon: '❌', label: 'Error', color: '#ef4444' },
+
+            // Small Talk stages (NEW)
+            explaining: { icon: '💡', label: 'Explaining', color: '#06b6d4' },
+
+            // Episode Search stages (NEW)
+            episode_searching: { icon: '📺', label: 'Finding Episodes', color: '#f59e0b' },
+            episode_selected: { icon: '✓', label: 'Episode Found', color: '#10b981' }
+        };
+
+        // ============================================================
+        // DOM ELEMENTS
+        // ============================================================
+        const elements = {
+            messages: document.getElementById('messages'),
+            welcome: document.getElementById('welcome'),
+            loadingContainer: document.getElementById('loading-container'),
+            loadingIcon: document.getElementById('loading-icon'),
+            loadingLabel: document.getElementById('loading-label'),
+            loadingMessage: document.getElementById('loading-message'),
+            progressCircle: document.querySelector('.progress-ring .progress'),
+            input: document.getElementById('question-input'),
+            sendBtn: document.getElementById('send-btn')
+        };
+
+        // ============================================================
+        // FUNCTIONS
+        // ============================================================
+
+        function askQuestion(text) {
+            elements.input.value = text;
+            sendMessage();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const question = elements.input.value.trim();
+            if (!question || state.isLoading) return;
+
+            // Hide welcome
+            elements.welcome.style.display = 'none';
+
+            // Add user message
+            addMessage('user', question);
+            elements.input.value = '';
+
+            // Start streaming
+            streamChat(question);
+        }
+
+        function addMessage(role, content, metadata = null) {
+            const msg = document.createElement('div');
+            msg.className = `message ${role}`;
+
+            // Generate unique ID for this message (for recommendations)
+            const msgId = 'msg-' + Date.now();
+            msg.id = msgId;
+
+            // Determine branch type for styling
+            const branch = metadata?.branch || 'clip_search';
+
+            let html = `
+                <div class="avatar">${role === 'user' ? 'U' : 'E'}</div>
+                <div class="message-content">
+            `;
+
+            // Branch badge (optional - shown for non-clip-search branches)
+            if (role === 'assistant' && branch && branch !== 'clip_search') {
+                const branchLabels = {
+                    'small_talk': '💬 Chat',
+                    'episode_search': '📺 Episode',
+                    'clip_search': '🎬 Clip'
+                };
+                const branchClasses = {
+                    'small_talk': 'small-talk',
+                    'episode_search': 'episode-search',
+                    'clip_search': 'clip-search'
+                };
+                html += `
+                    <div class="branch-badge ${branchClasses[branch] || 'clip-search'}">
+                        ${branchLabels[branch] || 'Clip Search'}
+                    </div>
+                `;
+            }
+
+            // Follow-up badge (existing)
+            if (role === 'assistant' && metadata?.is_followup) {
+                html += `
+                    <div class="followup-badge">
+                        🔄 Follow-up: "${metadata.resolved_query?.substring(0, 40)}..."
+                    </div>
+                `;
+            }
+
+            // Message bubble
+            html += `<div class="message-bubble">${content}</div>`;
+
+            // === BRANCH-SPECIFIC RENDERING ===
+
+            if (role === 'assistant') {
+                if (branch === 'small_talk') {
+                    // SMALL TALK: Text only, possibly with sources
+                    if (metadata?.sources && metadata.sources.length > 0) {
+                        html += `
+                            <div class="sources-list">
+                                <div class="sources-label">Sources</div>
+                                ${metadata.sources.map(s => `
+                                    <a href="${s.uri}" target="_blank" rel="noopener noreferrer" class="source-link">
+                                        ${s.title || s.uri}
+                                    </a>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
+
+                } else if (branch === 'episode_search' && metadata?.episode) {
+                    // EPISODE SEARCH: Episode card
+                    const ep = metadata.episode;
+                    html += `
+                        <div class="episode-card">
+                            <div class="episode-card-header">
+                                ${ep.image
+                                    ? `<img src="${ep.image}" alt="Episode thumbnail" class="episode-thumbnail">`
+                                    : `<div class="episode-thumbnail-placeholder">🎙️</div>`
+                                }
+                                <div class="episode-details">
+                                    <h4>${ep.podcast_title || 'Podcast'}</h4>
+                                    <h3>${ep.episode_title || 'Unknown Episode'}</h3>
+                                    <div class="episode-meta">
+                                        ${ep.published_date ? `<span>📅 ${new Date(ep.published_date).toLocaleDateString()}</span>` : ''}
+                                        ${ep.guests?.length > 0 ? `<span>🎤 ${ep.guests.join(', ')}</span>` : ''}
+                                        ${ep.hosts?.length > 0 ? `<span>🎙️ ${ep.hosts.join(', ')}</span>` : ''}
+                                    </div>
+                                    ${ep.description ? `<p class="episode-description">${ep.description}</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="episode-actions">
+                                ${ep.uri ? `
+                                    <a href="${ep.uri}" target="_blank" rel="noopener noreferrer" class="episode-action-btn">
+                                        ▶️ Listen
+                                    </a>
+                                ` : ''}
+                                <button class="episode-action-btn" onclick="askQuestion('Tell me more about this episode')">
+                                    💬 Find clips from this episode
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    // Add timing info
+                    if (metadata.total_time) {
+                        html += `
+                            <div class="timing-info">
+                                ⏱️ Total time: ${metadata.total_time.toFixed(2)}s
+                            </div>
+                        `;
+                    }
+
+                } else if (metadata?.video_url || metadata?.video_chunk_path) {
+                    // CLIP SEARCH: Existing video card behavior
+                    const mediaUrl = metadata.video_chunk_path || metadata.video_url;
+                    const isVideo = mediaUrl && (mediaUrl.includes('.mp4') || mediaUrl.includes('video'));
+
+                    html += `
+                        <div class="video-card">
+                            ${isVideo
+                                ? `<video controls src="${mediaUrl}"></video>`
+                                : `<audio controls src="${mediaUrl}" style="width: 100%; padding: 1rem;"></audio>`
+                            }
+                            <div class="video-info">
+                                <h4>${metadata.podcast_title || 'Unknown Podcast'}</h4>
+                                <h3>${metadata.episode_title || 'Unknown Episode'}</h3>
+                                <div class="video-meta">
+                                    <span>🎤 ${Array.isArray(metadata.speakers) ? metadata.speakers.join(', ') : (metadata.speakers || 'Unknown')}</span>
+                                    <span>📊 ${Math.round((metadata.confidence || 0) * 100)}% confidence</span>
+                                </div>
+                            </div>
+                            ${metadata.total_time ? `
+                                <div class="timing-info">
+                                    ⏱️ Total time: ${metadata.total_time.toFixed(2)}s
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+            }
+
+            // Add recommendations placeholder for clip search assistant messages
+            if (role === 'assistant' && metadata?.turn_id && branch === 'clip_search') {
+                html += `
+                    <div class="recommendations-container" id="recs-${msgId}" style="display: none;">
+                        <div class="recommendations-label">Related clips</div>
+                        <div class="recommendations-list" id="recs-list-${msgId}">
+                            <div class="recommendations-loading">
+                                <div class="spinner"></div>
+                                <span>Finding more clips...</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Add recommendations placeholder for episode search assistant messages
+            if (role === 'assistant' && metadata?.turn_id && branch === 'episode_search') {
+                html += `
+                    <div class="recommendations-container" id="ep-recs-${msgId}" style="display: none;">
+                        <div class="recommendations-label">Related episodes</div>
+                        <div class="recommendations-list" id="ep-recs-list-${msgId}">
+                            <div class="recommendations-loading">
+                                <div class="spinner"></div>
+                                <span>Finding more episodes...</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            msg.innerHTML = html;
+
+            elements.messages.appendChild(msg);
+            elements.messages.scrollTop = elements.messages.scrollHeight;
+
+            state.messages.push({ role, content, metadata });
+
+            // Track last assistant message for recommendations
+            if (role === 'assistant') {
+                state.lastMessageElement = msg;
+                state.currentTurnId = metadata?.turn_id;
+            }
+
+            return msg;
+        }
+
+        function updateProgress(progress) {
+            const circumference = 2 * Math.PI * 52;
+            const offset = circumference - (progress * circumference);
+            elements.progressCircle.style.strokeDashoffset = offset;
+        }
+
+        function updateStage(stage, message) {
+            const config = STAGES[stage] || STAGES.analyzing;
+
+            elements.loadingIcon.textContent = config.icon;
+            elements.loadingLabel.textContent = config.label;
+            elements.loadingMessage.textContent = message;
+
+            // Update pills
+            const pills = document.querySelectorAll('.stage-pill');
+            const stageOrder = ['routing', 'analyzing', 'embedding', 'searching', 'reranking', 'selecting'];
+
+            // Map stage to pill stage
+            const stageToMain = {
+                // Router (NEW)
+                'routing': 'routing', 'routed': 'routing',
+
+                // Existing
+                'analyzing': 'analyzing', 'analyzed': 'analyzing',
+                'embedding': 'embedding', 'embedded': 'embedding',
+                'searching': 'searching', 'searched': 'searching',
+                'fetching': 'searching', 'fetched': 'searching',
+                'reranking': 'reranking', 'reranked': 'reranking',
+                'selecting': 'selecting', 'complete': 'selecting',
+
+                // Small Talk (maps to analyzing since it's quick)
+                'explaining': 'analyzing',
+
+                // Episode Search (NEW)
+                'episode_searching': 'searching',
+                'episode_selected': 'selecting'
+            };
+
+            const mainStage = stageToMain[stage] || 'analyzing';
+            const currentIndex = stageOrder.indexOf(mainStage);
+
+            pills.forEach(pill => {
+                const pillStage = pill.dataset.stage;
+                const pillIndex = stageOrder.indexOf(pillStage);
+
+                pill.classList.remove('active', 'complete');
+
+                if (stage === 'complete') {
+                    pill.classList.add('complete');
+                } else if (pillIndex < currentIndex) {
+                    pill.classList.add('complete');
+                } else if (pillIndex === currentIndex) {
+                    pill.classList.add('active');
+                }
+            });
+        }
+
+        function showLoading(show) {
+            state.isLoading = show;
+            elements.loadingContainer.classList.toggle('active', show);
+            elements.sendBtn.disabled = show;
+
+            if (show) {
+                updateProgress(0);
+                updateStage('analyzing', 'Starting...');
+            }
+        }
+
+        function showRecommendations(turnId, recommendations) {
+            // Find the last assistant message element
+            const msgElement = state.lastMessageElement;
+            if (!msgElement) return;
+
+            const msgId = msgElement.id;
+            const recsContainer = document.getElementById(`recs-${msgId}`);
+            const recsList = document.getElementById(`recs-list-${msgId}`);
+
+            if (!recsContainer || !recsList) return;
+
+            // Show container
+            recsContainer.style.display = 'block';
+
+            // Build recommendation pills
+            let pillsHtml = '';
+            recommendations.forEach((rec, i) => {
+                pillsHtml += `
+                    <button class="recommendation-pill"
+                            data-turn-id="${turnId}"
+                            data-index="${rec.index}"
+                            onclick="clickRecommendation(this, '${turnId}', ${rec.index})">
+                        <span class="icon">💡</span>
+                        <span>${rec.prompt}</span>
+                    </button>
+                `;
+            });
+
+            recsList.innerHTML = pillsHtml;
+            elements.messages.scrollTop = elements.messages.scrollHeight;
+        }
+
+        async function clickRecommendation(button, turnId, index) {
+            // Disable the button while loading
+            button.classList.add('loading');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="icon">⏳</span><span>Loading...</span>';
+
+            try {
+                const response = await fetch('/api/recommendation/click', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: state.sessionId,
+                        turn_id: turnId,
+                        recommendation_index: index
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load recommendation');
+                }
+
+                const data = await response.json();
+
+                // Add the recommendation as a new message
+                addMessage('assistant', data.answer, {
+                    video_url: data.video_url,
+                    video_chunk_path: data.video_chunk_path,
+                    episode_title: data.episode_title,
+                    podcast_title: data.podcast_title,
+                    speakers: data.speakers,
+                    confidence: data.confidence,
+                    is_followup: false,
+                    resolved_query: null,
+                    total_time: null,
+                    turn_id: null  // No recommendations for recommendations
+                });
+
+                // Remove the clicked recommendation pill
+                button.remove();
+
+            } catch (error) {
+                console.error('Recommendation click error:', error);
+                button.classList.remove('loading');
+                button.innerHTML = originalText;
+                alert('Failed to load recommendation: ' + error.message);
+            }
+        }
+
+        function showEpisodeRecommendations(turnId, recommendations) {
+            // Find the last assistant message element
+            const msgElement = state.lastMessageElement;
+            if (!msgElement) return;
+
+            const msgId = msgElement.id;
+            const recsContainer = document.getElementById(`ep-recs-${msgId}`);
+            const recsList = document.getElementById(`ep-recs-list-${msgId}`);
+
+            if (!recsContainer || !recsList) return;
+
+            // Show container
+            recsContainer.style.display = 'block';
+
+            // Build recommendation pills
+            let pillsHtml = '';
+            recommendations.forEach((rec, i) => {
+                pillsHtml += `
+                    <button class="recommendation-pill"
+                            data-turn-id="${turnId}"
+                            data-index="${rec.index}"
+                            onclick="clickEpisodeRecommendation(this, '${turnId}', ${rec.index})">
+                        <span class="icon">📺</span>
+                        <span>${rec.prompt}</span>
+                    </button>
+                `;
+            });
+
+            recsList.innerHTML = pillsHtml;
+            elements.messages.scrollTop = elements.messages.scrollHeight;
+        }
+
+        async function clickEpisodeRecommendation(button, turnId, index) {
+            // Disable the button while loading
+            button.classList.add('loading');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span class="icon">⏳</span><span>Loading...</span>';
+
+            try {
+                const response = await fetch('/api/episode-recommendation/click', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: state.sessionId,
+                        turn_id: turnId,
+                        recommendation_index: index
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load episode recommendation');
+                }
+
+                const data = await response.json();
+
+                // Add the episode recommendation as a new message
+                addMessage('assistant', data.answer, {
+                    branch: 'episode_search',
+                    episode: {
+                        episode_id: data.episode_id,
+                        episode_title: data.episode_title,
+                        podcast_title: data.podcast_title,
+                        published_date: data.published_date,
+                        hosts: data.hosts || [],
+                        guests: data.guests || [],
+                        description: data.episode_description,
+                        uri: data.episode_uri,
+                        image: data.episode_image
+                    },
+                    total_time: null,
+                    turn_id: null  // No further recommendations for recommendations
+                });
+
+                // Remove the clicked recommendation pill
+                button.remove();
+
+            } catch (error) {
+                console.error('Episode recommendation click error:', error);
+                button.classList.remove('loading');
+                button.innerHTML = originalText;
+                alert('Failed to load episode recommendation: ' + error.message);
+            }
+        }
+
+        async function streamChat(question) {
+            showLoading(true);
+
+            try {
+                const response = await fetch('/api/chat/stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: state.sessionId,
+                        question: question
+                    })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+
+                    // Parse SSE events
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (line.startsWith('data:')) {
+                            const jsonStr = line.slice(5).trim();
+                            if (!jsonStr) continue;
+
+                            try {
+                                const event = JSON.parse(jsonStr);
+
+                                if (event.stage === 'complete') {
+                                    showLoading(false);
+                                    // Data is nested under event.data
+                                    const data = event.data || {};
+                                    const branch = data.branch || 'clip_search';
+
+                                    if (branch === 'small_talk') {
+                                        // SMALL TALK RESPONSE
+                                        addMessage('assistant', data.answer || 'Hello! How can I help you?', {
+                                            branch: 'small_talk',
+                                            sources: data.sources || [],  // Grounding sources from Gemini
+                                            total_time: data.total_time
+                                        });
+
+                                    } else if (branch === 'episode_search') {
+                                        // EPISODE SEARCH RESPONSE
+                                        const episode = data.episode || {};
+                                        addMessage('assistant', data.answer || 'Here\'s what I found:', {
+                                            branch: 'episode_search',
+                                            episode: {
+                                                episode_title: episode.episode_title || episode.title,
+                                                podcast_title: episode.podcast_title || episode.show_name,
+                                                published_date: episode.published_date || episode.date,
+                                                hosts: episode.hosts || [],
+                                                guests: episode.guests || [],
+                                                description: episode.description || episode.summary,
+                                                uri: episode.uri || episode.url || episode.link,
+                                                image: episode.image || episode.thumbnail
+                                            },
+                                            total_time: data.total_time,
+                                            turn_id: data.turn_id  // For episode recommendations
+                                        });
+
+                                    } else {
+                                        // CLIP SEARCH RESPONSE (existing behavior)
+                                        const chunk = data.chunk || {};
+                                        addMessage('assistant', data.answer || 'No answer available', {
+                                            branch: 'clip_search',
+                                            video_url: chunk.chunkAudioUrl || chunk.videoChunkPath,
+                                            video_chunk_path: chunk.videoChunkPath || (chunk.additionalData && chunk.additionalData.videoChunkPath),
+                                            episode_title: chunk.episode_title || (chunk.pinecone_metadata && chunk.pinecone_metadata.episodeTitle),
+                                            podcast_title: chunk.podcast_title || (chunk.pinecone_metadata && chunk.pinecone_metadata.channelTitle),
+                                            speakers: chunk.speakers || [],
+                                            confidence: data.confidence || 0.8,
+                                            is_followup: data.is_followup || false,
+                                            resolved_query: data.resolved_query,
+                                            total_time: data.total_time,
+                                            turn_id: data.turn_id  // For recommendations
+                                        });
+                                    }
+                                } else if (event.stage === 'recommendations') {
+                                    // Handle clip recommendations event (arrives after complete)
+                                    const data = event.data || {};
+                                    if (data.recommendations && data.recommendations.length > 0) {
+                                        showRecommendations(data.turn_id, data.recommendations);
+                                    }
+                                } else if (event.stage === 'episode_recommendations') {
+                                    // Handle episode recommendations event (arrives after episode search complete)
+                                    const data = event.data || {};
+                                    if (data.recommendations && data.recommendations.length > 0) {
+                                        showEpisodeRecommendations(data.turn_id, data.recommendations);
+                                    }
+                                } else if (event.stage === 'error') {
+                                    showLoading(false);
+                                    addMessage('assistant', 'Sorry, there was an error: ' + (event.message || 'Unknown error'));
+                                } else {
+                                    updateProgress(event.progress || 0);
+                                    updateStage(event.stage, event.message);
+                                }
+                            } catch (e) {
+                                console.error('Parse error:', e, jsonStr);
+                            }
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error('Stream error:', error);
+                showLoading(false);
+                addMessage('assistant', 'Sorry, there was an error processing your request: ' + error.message);
+            }
+        }
+
+        function resetChat() {
+            state.messages = [];
+            state.sessionId = 'session-' + Date.now();
+            elements.messages.innerHTML = '';
+            elements.welcome.style.display = 'block';
+            elements.messages.appendChild(elements.welcome);
+
+            // Reset backend memory
+            fetch(`/api/session/reset?session_id=${state.sessionId}`, { method: 'POST' });
+        }
+
+        async function showMemory() {
+            try {
+                const response = await fetch(`/api/session/${state.sessionId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(`Memory State:\n\nSession: ${data.session_id}\nTurns: ${data.turn_count}\nEntities: ${data.recent_entities.join(', ') || 'None'}\nThemes: ${data.themes.join(', ') || 'None'}`);
+                } else {
+                    alert('No memory found for this session yet.');
+                }
+            } catch (e) {
+                alert('Could not fetch memory: ' + e.message);
+            }
+        }
+    </script>
+</body>
+</html>

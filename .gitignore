@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env
+.env.*
+!.env.example
+
+# Secrets / credentials (defensive)
+*.pem
+*.key
+secrets.*
+credentials.*
+
+# Generated / large artifacts (not committed)
+bm25_model.json
+agent_test_results.json
+*_results.json
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

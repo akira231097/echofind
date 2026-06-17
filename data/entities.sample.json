@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "note": "Synthetic sample catalog for local development and demos. All hosts, guests, and shows below are fictional and do not represent any real catalog.",
+    "schema": {
+      "unique_authors": "channel / host handles indexed in the corpus",
+      "unique_personalities": "guests / people mentioned across episodes",
+      "unique_shows": "show / podcast titles",
+      "aliases": "shorthand -> canonical-name lookups used by the gazetteer"
+    }
+  },
+  "unique_authors": [
+    "the deep dive",
+    "frontier talks",
+    "mind and machine",
+    "the founders room",
+    "open channel",
+    "signal and noise",
+    "the long game",
+    "curious minds daily",
+    "after hours lab",
+    "the quiet hour",
+    "north star media",
+    "tabula rasa"
+  ],
+  "unique_personalities": [
+    "dr. elena voss",
+    "marcus bell",
+    "priya nair",
+    "jonas reed",
+    "sofia marchetti",
+    "daniel okafor",
+    "ava lindqvist",
+    "theo park",
+    "rosa delgado",
+    "kenji tanaka",
+    "noor haddad",
+    "samuel quincy",
+    "lena petrova",
+    "victor amaru",
+    "iris chen",
+    "gabriel mensah",
+    "mara whitfield",
+    "oliver brandt",
+    "yuki sato",
+    "amelia frost",
+    "dr. raj malhotra",
+    "clara nyberg",
+    "felix moreau",
+    "hannah okonkwo",
+    "leo castellano"
+  ],
+  "unique_shows": [
+    "the deep dive",
+    "frontier talks",
+    "mind and machine",
+    "the founders room",
+    "signal and noise",
+    "the long game",
+    "curious minds",
+    "after hours lab",
+    "the quiet hour",
+    "north star sessions"
+  ],
+  "aliases": {
+    "elena": "dr. elena voss",
+    "dr voss": "dr. elena voss",
+    "raj": "dr. raj malhotra",
+    "deep dive": "the deep dive",
+    "m and m": "mind and machine",
+    "founders room": "the founders room"
+  }
+}
