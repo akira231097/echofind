@@ -2,6 +2,7 @@
 
 **A memory-aware, conversational RAG engine that finds the single best podcast clip or episode for a natural-language question.**
 
+[![CI](https://github.com/akira231097/echofind/actions/workflows/ci.yml/badge.svg)](https://github.com/akira231097/echofind/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
 ![Gemini](https://img.shields.io/badge/LLM-Gemini-4285F4?logo=google&logoColor=white)
