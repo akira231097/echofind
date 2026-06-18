@@ -157,6 +157,11 @@ These are the parts worth a closer look:
   retries, and fallbacks at every stage (optional grounding, entity-filter and
   recall fallbacks, per-stage fallback selections).
 
+📝 **Deep dives:** the architecture and these two techniques are written up in
+detail — see [`docs/DESIGN.md`](docs/DESIGN.md) and the engineering write-ups in
+[`docs/blog/`](docs/blog/) ([multi-level RRF + weighted HyDE](docs/blog/01-multi-level-rrf-weighted-hyde.md),
+[single-call select + memory](docs/blog/02-single-call-select-and-memory.md)).
+
 ---
 
 ## Performance
