@@ -34,6 +34,7 @@ resolve pronouns, follow-ups, and topic shifts across turns.
 - [Why it's interesting](#why-its-interesting)
 - [How it works](#how-it-works)
 - [Standout engineering](#standout-engineering)
+- [Performance](#performance)
 - [Tech stack](#tech-stack)
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
@@ -154,6 +155,26 @@ These are the parts worth a closer look:
   `asyncio.gather` over HyDE calls / buckets / branches, exponential-backoff
   retries, and fallbacks at every stage (optional grounding, entity-filter and
   recall fallbacks, per-stage fallback selections).
+
+---
+
+## Performance
+
+A design goal is that the **deterministic memory layer is never the bottleneck** —
+LLM calls should dominate latency, not bookkeeping. A reproducible micro-benchmark
+([`benchmarks/memory_bench.py`](benchmarks/memory_bench.py)) measures the pure-Python
+per-turn cost at a realistic steady state (~50 turns of history), on commodity hardware:
+
+| Operation (per turn) | p50 | p95 |
+| --- | --- | --- |
+| Full memory update (entity decay, topic thread, exclusion window, compression) | ~0.04 ms | ~0.14 ms |
+| Render router context | ~0.005 ms | ~0.008 ms |
+| Render query-analyzer context | ~0.009 ms | ~0.027 ms |
+| Render full memory prompt | ~0.006 ms | ~0.018 ms |
+| Exclusion-window lookup | <0.001 ms | <0.001 ms |
+
+The entire memory layer costs **well under 0.2 ms per turn** — three to four orders
+of magnitude below a single model round-trip. Reproduce: `python benchmarks/memory_bench.py`.
 
 ---
 
