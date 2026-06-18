@@ -35,6 +35,7 @@ resolve pronouns, follow-ups, and topic shifts across turns.
 - [How it works](#how-it-works)
 - [Standout engineering](#standout-engineering)
 - [Performance](#performance)
+- [Evaluation](#evaluation)
 - [Tech stack](#tech-stack)
 - [Project structure](#project-structure)
 - [Getting started](#getting-started)
@@ -175,6 +176,36 @@ per-turn cost at a realistic steady state (~50 turns of history), on commodity h
 
 The entire memory layer costs **well under 0.2 ms per turn** — three to four orders
 of magnitude below a single model round-trip. Reproduce: `python benchmarks/memory_bench.py`.
+
+---
+
+## Evaluation
+
+Retrieval quality is measured by a reproducible harness
+([`evals/retrieval_eval.py`](evals/retrieval_eval.py)) that runs the **real**
+clip-search pipeline against a labeled query set and reports Hit@k, Recall@k,
+MRR, end-to-end selection accuracy, and latency percentiles — with optional
+[RAGAS](https://docs.ragas.io) answer scoring (`--ragas`). The harness captures
+the ranked candidate set by wrapping the scoring stage at runtime, so it
+measures the production path without touching it.
+
+Because EchoFind's accuracy depends on a private podcast index and relational
+store, the harness has two modes:
+
+- **Skeleton** (default, no credentials) — validates the labeled set and metric
+  wiring and prints what *would* run, but emits **zero** numbers. It will never
+  fabricate a metric.
+- **Live** (with `OPENAI` / `PINECONE` / `GEMINI` / `RDS_*` set) — boots the same
+  agent `server.py` builds and prints real metrics.
+
+```bash
+python evals/retrieval_eval.py              # skeleton check, no creds
+python evals/retrieval_eval.py --repeats 3  # live: retrieval + latency
+python evals/retrieval_eval.py --ragas      # live + answer faithfulness/relevancy
+```
+
+See [`evals/README.md`](evals/README.md) for the metric definitions and the
+labeled-query-set format.
 
 ---
 

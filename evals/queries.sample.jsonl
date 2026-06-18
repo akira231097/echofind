@@ -1,0 +1,10 @@
+{"query": "what did the guest say about building reliable AI agents and tool use", "relevant": {"guests_any": ["dr. elena voss"], "episode_title_contains": ["agent reliability", "tool use"]}, "reference_answer": "Reliable agents need well-typed tools, retries, and self-correction loops rather than longer prompts."}
+{"query": "how should an early-stage founder think about pricing", "relevant": {"shows_any": ["the founders room"], "guests_any": ["marcus bell"], "episode_title_contains": ["pricing"]}, "reference_answer": "Anchor pricing to the value delivered, start usage-based, and revisit it as the product matures."}
+{"query": "the most important term-sheet detail when raising a seed round", "relevant": {"shows_any": ["the founders room"], "episode_title_contains": ["term sheet", "fundraising"]}}
+{"query": "latest episode on evaluating whether an autonomous agent actually works", "relevant": {"guests_any": ["dr. elena voss", "theo park"], "episode_title_contains": ["evaluation", "benchmark"]}}
+{"query": "anything from priya nair on scaling a team past ten people", "relevant": {"guests_any": ["priya nair"], "episode_title_contains": ["delegation", "scaling the team"]}}
+{"query": "why is climate hardware so hard to build", "relevant": {"shows_any": ["the long game"], "episode_title_contains": ["climate", "hardware"]}}
+{"query": "making remote work culture actually function", "relevant": {"guests_any": ["jonas reed"], "episode_title_contains": ["remote", "culture"]}}
+{"query": "deep work and protecting focus in a noisy org", "relevant": {"shows_any": ["signal and noise"], "episode_title_contains": ["deep work", "focus"]}}
+{"query": "what does sofia marchetti say about supply chain resilience", "relevant": {"guests_any": ["sofia marchetti"], "episode_title_contains": ["supply chain"]}}
+{"query": "the science of longevity and healthspan", "relevant": {"shows_any": ["mind and machine", "frontier talks"], "episode_title_contains": ["longevity", "healthspan"]}}
